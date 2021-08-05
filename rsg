@@ -76,7 +76,7 @@ def main(argv):
     port = '9001'
     host = ''
     type = ''
-    pattern = ''
+    # pattern = ''
     add_pattern = False
     pref_path = '/bin/'
     pref_shell = 'bash'
@@ -103,7 +103,8 @@ def main(argv):
             use_type = True
             type = arg
         elif opt in ['-p', '--pattern']:
-            pattern = arg
+            global _pattern
+            _pattern = arg
             use_pattern = True
         elif opt in ['-a', '--add-db']:
             if use_pattern == True:
@@ -161,6 +162,8 @@ def main(argv):
         print("ERROR. No interface showing a class of network which IP address belongs to. Exiting.")
         sys.exit(-1)
 
+    if (add_pattern):
+        save_pattern(_pattern)
     shells = os.path.join(os.path.dirname(os.path.realpath(__file__)), _db)
 
     # if len(argv) == 4:
@@ -221,6 +224,18 @@ def switch_enc(cmd, mode):
         2: urllib.parse.quote_plus(cmd)
     }
     return switcher.get(mode, cmd)
+
+def save_pattern(pattern):
+    with open(_db, 'a+') as db_file:
+        # Move read cursor to the start of file.
+        db_file.seek(0)
+        # If file is not empty then append '\n'
+        data = db_file.read(100)
+        if len(data) > 0 :
+            db_file.write("\n")
+        db_file.write(pattern)
+        print(GREEN('[+] INFO. New pattern saved to data file.'))
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
