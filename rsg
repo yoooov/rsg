@@ -28,7 +28,13 @@ def usage():
     sys.exit(-1)
 
 def list_types():
-    print('here comes the list of handled types')
+    print('[+] Handled types of Reverse Shells:')
+    shells = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'shells.txt')
+    sh_list = []
+    for shell in open(shells):
+        desc, junk = shell.split('|', 1)
+        sh_list.append(desc)
+    unique(sh_list)
 
 def verify_ip(ipaddr):
 
@@ -44,6 +50,7 @@ def main(argv):
     port = '9001'
     host = ''
     type = ''
+    use_type = False
 
 
     # argv = sys.argv[1:]
@@ -61,6 +68,7 @@ def main(argv):
         elif opt in ['-p', '--port']:
             port = arg
         elif opt in ('-T', '--type'):
+            use_type = True
             type = arg
         elif opt in ['-h', '--help']:
             usage()
@@ -71,8 +79,6 @@ def main(argv):
         elif opt in ('-v', '--verbose'):
             global _verbose
             _verbose = 1
-
-
 
     print("debug args: " + type + ";" + host + ";" + port)
 
@@ -105,8 +111,11 @@ def main(argv):
         exit_code(-1)
 
     shells = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'shells.txt')
-    if len(argv) == 4:
-        shell_type = argv[3].upper()
+
+    # if len(argv) == 4:
+    if (use_type):
+        # shell_type = argv[3].upper()
+        shell_type = type.upper()
     else:
         shell_type = ''
     for shell in open(shells):
@@ -144,6 +153,12 @@ def grab_ip(input):
     candidate_ips = [ip for ip in re.findall(r"(?:\d{1,3}\.){3}\d{1,3}",input) if '255' not in ip]
     return candidate_ips
 
+def unique(_list):
+    list_set = set(_list)
+    unique_list = (list(sorted(list_set)))
+    for u in unique_list:
+        print(GREEN(u))
+    print('\n')
 
 if __name__ == "__main__":
     main(sys.argv[1:])
