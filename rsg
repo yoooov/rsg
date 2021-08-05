@@ -164,6 +164,7 @@ def main(argv):
 
     if (add_pattern):
         save_pattern(_pattern)
+
     shells = os.path.join(os.path.dirname(os.path.realpath(__file__)), _db)
 
     # if len(argv) == 4:
